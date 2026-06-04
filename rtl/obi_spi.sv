@@ -9,16 +9,16 @@ module obi_spi #(
   //  A channel
   input   logic                     obi_areq_i,
   output  logic                     obi_agnt_o,
-  input   logic [AddrWidth-1:0]    obi_aaddr_i,
-  input   logic [DataWidth-1:0]    obi_awdata_i,
+  input   logic [AddrWidth-1:0]     obi_aaddr_i,
+  input   logic [DataWidth-1:0]     obi_awdata_i,
 
   input   logic                     obi_awe_i,
-  input   logic [DataWidth/8-1:0]  obi_abe_i,
+  input   logic [DataWidth/8-1:0]   obi_abe_i,
 
   //  R channel
   output  logic                     obi_rvalid_o,
   input   logic                     obi_rready_i,
-  output  logic [DataWidth-1:0]    obi_rdata_o,
+  output  logic [DataWidth-1:0]     obi_rdata_o,
   output  logic                     obi_rerr_o,   // Response Error - TODO
 
   // SPI master
@@ -34,9 +34,9 @@ module obi_spi #(
   **********                 LOCALPARAM                **********
   **************************************************************/
 
-  localparam int AddrWidth = 32;
-  localparam int DataWidth = 32;
-  localparam int SpiDataLength = 8;
+  localparam int AddrWidth                  = 32;  
+  localparam int DataWidth                  = 32;
+  localparam int SpiDataLength              = 8;
 
   // Register Address Offsets
   localparam int TxDataRegAddrOffset        = 0;
@@ -140,7 +140,7 @@ module obi_spi #(
 
   always_comb begin
     ctrl_complete_bit_next = ctrl_complete_bit;
-    if(obi_a_write && obi_aaddr_i == CtrlRegAddrOffset && obi_abe_i[0])
+    if(obi_a_write && (obi_aaddr_i == CtrlRegAddrOffset) && obi_abe_i[0])
       ctrl_complete_bit_next = obi_awdata_i[CtrlCompleteBit];
     else if(spi_state == eSPI_DONE)
       ctrl_complete_bit_next = '1;
