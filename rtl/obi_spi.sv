@@ -136,11 +136,11 @@ module obi_spi #(
   // Control Complete Bit
   register ctrl_complete_bit_inst (.clk(clk_i), .rstn(rstn_i), .ce(ctrl_complete_bit_write), .in(ctrl_complete_bit_next), .out(ctrl_complete_bit));
 
-  assign ctrl_complete_bit_write = (obi_a_write && obi_aaddr_i == CtrlRegAddrOffset && obi_abe_i[0]) || spi_state == eSPI_DONE;
+  assign ctrl_complete_bit_write = (obi_a_write && (obi_aaddr_i[6:0] == CtrlRegAddrOffset) && obi_abe_i[0]) || spi_state == eSPI_DONE;
 
   always_comb begin
     ctrl_complete_bit_next = ctrl_complete_bit;
-    if(obi_a_write && (obi_aaddr_i == CtrlRegAddrOffset) && obi_abe_i[0])
+    if(obi_a_write && (obi_aaddr_i[6:0] == CtrlRegAddrOffset) && obi_abe_i[0])
       ctrl_complete_bit_next = obi_awdata_i[CtrlCompleteBit];
     else if(spi_state == eSPI_DONE)
       ctrl_complete_bit_next = '1;
@@ -215,8 +215,8 @@ module obi_spi #(
   
   assign complete_o = ctrl_complete_bit;
 
-  assign spi_started_reading = obi_a_write_valid && obi_aaddr_i == CtrlRegAddrOffset && obi_abe_i[0] && ((obi_awdata_i & CtrlStartReadingBitMask) > '0);
-  assign spi_started_writing = obi_a_write_valid && obi_aaddr_i == CtrlRegAddrOffset && obi_abe_i[0] && ((obi_awdata_i & CtrlStartWritingBitMask) > '0);
+  assign spi_started_reading = obi_a_write_valid && (obi_aaddr_i[6:0] == CtrlRegAddrOffset) && obi_abe_i[0] && ((obi_awdata_i & CtrlStartReadingBitMask) > '0);
+  assign spi_started_writing = obi_a_write_valid && (obi_aaddr_i[6:0] == CtrlRegAddrOffset) && obi_abe_i[0] && ((obi_awdata_i & CtrlStartWritingBitMask) > '0);
 
   assign ctrl_busy_bit = (spi_state == eSPI_READING || spi_state == eSPI_WRITING);
 
@@ -259,7 +259,7 @@ module obi_spi #(
   ) tx_data_reg_inst (
     .clk  (clk_i),
     .rstn (rstn_i),
-    .ce   (obi_a_write_valid && obi_aaddr_i == TxDataRegAddrOffset && obi_abe_i[0]),
+    .ce   (obi_a_write_valid && (obi_aaddr_i[6:0] == TxDataRegAddrOffset) && obi_abe_i[0]),
     .in   (obi_awdata_i[SpiDataLength - 1:0]),
     .out  (tx_data_reg)
   );
@@ -271,7 +271,7 @@ module obi_spi #(
   ) spi_div_clk_reg_inst (
     .clk  (clk_i),
     .rstn (rstn_i),
-    .ce   (obi_a_write_valid && obi_aaddr_i == SpiDivClkRegAddrOffset && obi_abe_i[0]),
+    .ce   (obi_a_write_valid && (obi_aaddr_i[6:0] == SpiDivClkRegAddrOffset) && obi_abe_i[0]),
     .in   (obi_awdata_i),
     .out  (spi_div_clk_reg)
   );
@@ -282,7 +282,7 @@ module obi_spi #(
   ) ss_reg_inst (
     .clk  (clk_i),
     .rstn (rstn_i),
-    .ce   (obi_a_write_valid && obi_aaddr_i == SsRegAddrOffset && obi_abe_i[0]),
+    .ce   (obi_a_write_valid && (obi_aaddr_i[6:0] == SsRegAddrOffset) && obi_abe_i[0]),
     .in   (obi_awdata_i[NUM_SLAVES-1:0]),
     .out  (ss_reg)
   );
@@ -291,7 +291,7 @@ module obi_spi #(
   register #(.DTYPE(logic[DataWidth-1:0])) obi_rdata_o_inst (.clk(clk_i), .rstn(rstn_i && (obi_a_read || ~obi_done)), .ce(obi_a_read), .in(obi_read_value), .out(obi_rdata_o));
 
   always_comb begin
-    unique case (obi_aaddr_i)
+    unique case (obi_aaddr_i[6:0])
       TxDataRegAddrOffset:    obi_read_value = {24'b0, tx_data_reg};
       RxDataRegAddrOffset:    obi_read_value = {24'b0, rx_data_reg};
       SpiDivClkRegAddrOffset: obi_read_value = spi_div_clk_reg;
