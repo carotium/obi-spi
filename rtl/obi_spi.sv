@@ -1,6 +1,8 @@
 module obi_spi #(
   parameter int unsigned NUM_SLAVES               = 4,
-  parameter int unsigned SCLK_COUNTER_RESET_VALUE = 0
+  parameter int unsigned SCLK_COUNTER_RESET_VALUE = 0,
+  localparam int AddrWidth                        = 32,  
+  localparam int DataWidth                        = 32
 ) (
   input logic clk_i,
   input logic rstn_i,
@@ -34,8 +36,7 @@ module obi_spi #(
   **********                 LOCALPARAM                **********
   **************************************************************/
 
-  localparam int AddrWidth                  = 32;  
-  localparam int DataWidth                  = 32;
+  
   localparam int SpiDataLength              = 8;
 
   // Register Address Offsets
