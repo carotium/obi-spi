@@ -1,8 +1,6 @@
 module obi_spi #(
   parameter int unsigned NUM_SLAVES               = 4,
-  parameter int unsigned SCLK_COUNTER_RESET_VALUE = 0,
-  localparam int AddrWidth                        = 32,  
-  localparam int DataWidth                        = 32
+  parameter int unsigned SCLK_COUNTER_RESET_VALUE = 0
 ) (
   input logic clk_i,
   input logic rstn_i,
@@ -36,7 +34,8 @@ module obi_spi #(
   **********                 LOCALPARAM                **********
   **************************************************************/
 
-  
+  localparam int AddrWidth                  = 32;  
+  localparam int DataWidth                  = 32;
   localparam int SpiDataLength              = 8;
 
   // Register Address Offsets
@@ -148,10 +147,10 @@ module obi_spi #(
   end
 
   // Control Start Reading Bit
-  register ctrl_start_reading_bit_inst (.clk (clk_i), .rstn (rstn_i && ~spi_completed), .ce(spi_started_reading), .in(1'b1), .out(ctrl_start_reading_bit));
+  register_wclear ctrl_start_reading_bit_inst (.clk (clk_i), .rstn (rstn_i), .clear(spi_completed), .ce(spi_started_reading), .in(1'b1), .out(ctrl_start_reading_bit));
 
   // Control Start Writing Bit
-  register ctrl_start_writing_bit_inst (.clk (clk_i), .rstn (rstn_i && ~spi_completed), .ce(spi_started_writing), .in(1'b1), .out(ctrl_start_writing_bit));
+  register_wclear ctrl_start_writing_bit_inst (.clk (clk_i), .rstn (rstn_i), .clear(spi_completed), .ce(spi_started_writing), .in(1'b1), .out(ctrl_start_writing_bit));
 
   // Control Register Value
   assign ctrl_reg_value = (
@@ -182,7 +181,8 @@ module obi_spi #(
     .WORD_WIDTH(4)
   ) spi_data_index_inst (
       .clk (clk_i),
-      .rstn(rstn_i && ~({28'b0, spi_data_index} == SpiDataLength)),
+      .rstn(rstn_i),
+      .clear(({28'b0, spi_data_index} == SpiDataLength)),
       .ce  (spi_sclk_counter == 0 && ~spi_sclk_o && spi_sclk_prev),
       .count (spi_data_index)
   );
@@ -192,7 +192,8 @@ module obi_spi #(
     .WORD_WIDTH(DataWidth)
   ) spi_sclk_counter_inst (
       .clk (clk_i),
-      .rstn(rstn_i && ~(spi_sclk_counter == spi_div_clk_reg) && spi_sclk_counter_en),
+      .rstn(rstn_i),
+      .clear((spi_sclk_counter == spi_div_clk_reg) && spi_sclk_counter_en),
       .ce  ((spi_sclk_counter < spi_div_clk_reg) && spi_sclk_counter_en),
       .count (spi_sclk_counter)
   );
@@ -201,7 +202,7 @@ module obi_spi #(
   register spi_sclk_prev_inst (.clk(clk_i), .rstn(rstn_i), .ce('1), .in(spi_sclk_o), .out(spi_sclk_prev));
 
   assign spi_sclk_ce = (spi_sclk_counter == spi_div_clk_reg) && (spi_div_clk_reg != '0);
-  register spi_sclk_o_inst (.clk(clk_i), .rstn(rstn_i && spi_ss_o < '1), .ce(spi_sclk_ce), .in(~spi_sclk_o), .out(spi_sclk_o));
+  register_wclear spi_sclk_o_inst (.clk(clk_i), .rstn(rstn_i), .clear(spi_ss_o == '1), .ce(spi_sclk_ce), .in(~spi_sclk_o), .out(spi_sclk_o));
 
   /**************************************************************
   **********                  SPI FSM                  **********
@@ -289,7 +290,16 @@ module obi_spi #(
   );
 
   // OBI Response Data Out Register
-  register #(.DTYPE(logic[DataWidth-1:0])) obi_rdata_o_inst (.clk(clk_i), .rstn(rstn_i && (obi_a_read || ~obi_done)), .ce(obi_a_read), .in(obi_read_value), .out(obi_rdata_o));
+  register_wclear #(
+    .DTYPE(logic[DataWidth-1:0])
+  ) obi_rdata_o_inst (
+      .clk(clk_i), 
+      .rstn(rstn_i),
+      .clear(obi_a_read || ~obi_done), 
+      .ce(obi_a_read), 
+      .in(obi_read_value), 
+      .out(obi_rdata_o)
+    );
 
   always_comb begin
     unique case (obi_aaddr_i[6:0])
