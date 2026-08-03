@@ -58,13 +58,13 @@ Controls the operation of the module.
 | ------------- | ------------- | ------------- | ------------- |
 | complete      |          busy | start_reading | start_writing |
 
-Setting the **start_writing** bit an SPI transaction is started, with the contents of `Tx` Register being sent.
+Setting the **start_writing** bit starts an SPI transaction, with the contents of `Tx` Register being sent.
 
-Setting the **start_reading** bit an SPI transaction is started, receiving data on SPI and storing it to `Rx` Register.
+Setting the **start_reading** bit starts an SPI transaction, receiving data on SPI and storing it to `Rx` Register.
 
 **Busy** bit is set whenever a read or write transaction is in progress.
 
-**Complete** bit is set when an SPI transaction is completed and **needs to be cleared** before initiating another SPI transaction.
+**Complete** bit is set when an SPI transaction completes and **needs to be cleared** before initiating another SPI transaction.
 
 # Operation
 This module counts to the set reset value and then switches the output serial clock, which effectively splits the input clock by an integer ratio.
