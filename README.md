@@ -63,10 +63,10 @@ Setting the **start_reading** bit starts an SPI transaction, receiving data on S
 
 **Busy** bit is set whenever a read or write transaction is in progress.
 
-**Complete** bit is set when an SPI transaction completes and **needs to be cleared** before initiating another SPI transaction.
+**Complete** bit is set when an SPI transaction completes and **needs to be cleared** before initiating another SPI transaction. Output port `complete_o` is synonymous with this bit.
 
 # Operation
-This module counts to the set reset value and then switches the output serial clock, which effectively splits the input clock by an integer ratio.
+This module counts to the set reset value and then switches the output serial clock, which effectively splits the input clock frequency by an integer ratio.
 
 **Example:**
 
