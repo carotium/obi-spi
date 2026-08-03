@@ -1,11 +1,10 @@
 # OBI Slave SPI Master
-This repository provides a simple SPI master with an OBI interface. The **number of slaves** and the **output SPI frequency** is parametrizable.
+This repository provides a simple SPI master with an OBI interface. The **number of slaves** is parametrizable and the **output SPI frequency** is configurable.
 
 # Parameters
 | **Parameter name**         | **Type** | **Description**
 | -------------------------- | -------- | ---------------
 | `NUM_SLAVES`               | uint     | Number of slaves.
-| `SCLK_COUNTER_RESET_VALUE` | uint     | Reset counter value.
 
 # Ports
 | **Signal Name** | **Type**         | **Direction**  |**Description**
@@ -70,4 +69,22 @@ Setting the **start_reading** bit starts an SPI transaction, receiving data on S
 This module counts to the set reset value and then switches the output serial clock, which effectively splits the input clock by an integer ratio.
 
 **Example:**
- The processor runs at 200 MHz and I want my SPI controller to run at 10 MHz. `SCLK_COUNTER_RESET_VALUE = 200 MHz / (10 MHz * 2) - 1 = 9`.
+
+I want to send 0x20 over SPI to the second slave, where the processor speed is 200 MHz and SPI runs at 10 MHz.
+
+Then I want to read from the same slave.
+
+`SCLK_COUNTER_RESET_VALUE = 200 MHz / (10 MHz * 2) - 1 = 9`.
+
+ 1) Set `NUM_SLAVES = 2` (to number of slaves you are using).
+ 2) Set `SCLK_COUNTER_RESET_VALUE = 9` (to the calculated value).
+ 3) Set `Tx = 0x20` register (if sending over SPI).
+ 4) Set `Ss = 0x2` register to select the slave you are sending/reading to/from.
+ 5) Set `start_writing` in `Ctrl` register.
+ 6) Wait for `complete` bit in `Ctrl` register to set.
+ 7) Clear `complete` bit in `Ctrl` register.
+ 8) Set `start_reading` in `Ctrl` register.
+ 9) Wait for `complete` bit in `Ctrl` register to set.
+ 10) Read from `Rx` register.
+ 11) Clear `complete` bit in `Ctrl` register.
+ 12) Clear `Ss = 0x0` register to unselect the slave.
