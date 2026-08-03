@@ -75,16 +75,16 @@ I want to send 0x20 over SPI to the second slave, where the processor speed is 2
 Then I want to read from the same slave.
 
 `SCLK_COUNTER_RESET_VALUE = 200 MHz / (10 MHz * 2) - 1 = 9`.
-
- 1) Set `NUM_SLAVES = 2` (to number of slaves you are using).
- 2) Set `SCLK_COUNTER_RESET_VALUE = 9` (to the calculated value).
- 3) Set `Tx = 0x20` register (if sending over SPI).
- 4) Set `Ss = 0x2` register to select the slave you are sending/reading to/from.
- 5) Set `start_writing` in `Ctrl` register.
- 6) Wait for `complete` bit in `Ctrl` register to set.
- 7) Clear `complete` bit in `Ctrl` register.
- 8) Set `start_reading` in `Ctrl` register.
- 9) Wait for `complete` bit in `Ctrl` register to set.
- 10) Read from `Rx` register.
- 11) Clear `complete` bit in `Ctrl` register.
- 12) Clear `Ss = 0x0` register to unselect the slave.
+ 
+ 0) Set `NUM_SLAVES = 2` (to number of slaves you are using) when instantiating this module.
+ 1) Set `SCLK_COUNTER_RESET_VALUE = 9` (to the calculated value).
+ 2) Set `Tx = 0x20` register (if sending over SPI).
+ 3) Set `Ss = 0x2` register (to select the slave you are sending/reading to/from).
+ 4) Set `start_writing` in `Ctrl` register.
+ 5) Wait for `complete` bit in `Ctrl` register to set.
+ 6) Clear `complete` bit in `Ctrl` register.
+ 7) Set `start_reading` bit in `Ctrl` register.
+ 8) Wait for `complete` bit in `Ctrl` register to set.
+ 9) Read from `Rx` register.
+ 10) Clear `complete` bit in `Ctrl` register.
+ 11) Clear `Ss = 0x0` register to unselect the slave.
