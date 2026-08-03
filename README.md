@@ -22,14 +22,14 @@ This repository provides a simple SPI master with an OBI interface. The **number
 # Register map
 
 ## `Tx` Register (offset 0x00, rw)
-Set data to be transferred over SPI (1 byte).
+Set data to be transferred over SPI.
 
 |   7 : 0    |
 | ---------- |
 | data byte  |
 
 ## `Rx` Register (offset 0x04, read-only)
-Read data transferred back from SPI (1 byte).
+Read data transferred back from SPI.
 
 |   7 : 0    |
 | ---------- |
@@ -51,11 +51,23 @@ Set the selected slave, one at a time.
 
 Selecting the slave means setting the corresponding bit in this register.
 
-## `Ctrl` Register (offset 0x10, read_only)
+## `Ctrl` Register (offset 0x10, rw)
+Controls the operation of the module.
+
+| 3             | 2             | 1             | 0             |
+| ------------- | ------------- | ------------- | ------------- |
+| complete      |          busy | start_reading | start_writing |
+
+Setting the **start_writing** bit an SPI transaction is started, with the contents of `Tx` Register being sent.
+
+Setting the **start_reading** bit an SPI transaction is started, receiving data on SPI and storing it to `Rx` Register.
+
+**Busy** bit is set whenever a read or write transaction is in progress.
+
+**Complete** bit is set when an SPI transaction is completed and **needs to be cleared** before initiating another SPI transaction.
 
 # Operation
-The module counts to the reset value and then switches the output serial clock, which effectively splits the input clock by an integer ratio.
+This module counts to the set reset value and then switches the output serial clock, which effectively splits the input clock by an integer ratio.
 
 **Example:**
-
  The processor runs at 200 MHz and I want my SPI controller to run at 10 MHz. `SCLK_COUNTER_RESET_VALUE = 200 MHz / (10 MHz * 2) - 1 = 9`.
